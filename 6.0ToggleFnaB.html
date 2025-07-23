@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Shapes with Captions</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent scrollbars from appearing */
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center; /* Vertically center the content */
+            justify-content: space-between; /* Space between the left and right content */
+        }
+
+        .container {
+            width: 48vw; /* 48% of viewport width */
+            height: auto; /* Height will be set dynamically */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-image: url('images/Background.png');
+            position: relative; /* Needed for absolutely positioned SVGs */
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Make SVGs invisible */
+            pointer-events: none; /* Disable pointer events on the entire SVG */
+        }
+
+        polygon {
+            pointer-events: all; /* Allow pointer events on the polygon itself */
+            cursor: pointer;
+        }
+
+        #caption {
+            visibility: hidden;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        #gozzoli-aotm {
+            width: 48vw; /* 48% of viewport width */
+            height: auto; /* Height will be set dynamically */
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        /* Magnifying Glass Styles */
+        #magnifier, #magnifier-right {
+            position: absolute;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: none;
+            width: 100px;
+            height: 100px;
+            background: none;
+            background-size: 200% 200%;
+            background-repeat: no-repeat;
+            display: none;
+            pointer-events: none; /* Prevent pointer events on the magnifier itself */
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="imageContainer">
+        <svg id="botticelli-bov" viewBox="0 0 7200 5695" preserveAspectRatio="xMinYMin meet">
+            <polygon class="cls-1" points="6643.83 1196.02 6619.32 1102.06 6543.74 1088.79 6593.79 958.06 6532.51 811 6456.94 811 6430.38 1088.79 6302.72 1132.7 6302.72 1241.98 6489.62 1255.26 6643.83 1196.02" fill="magenta" />
+        </svg>
+        <svg id="botticelli-primavera" viewBox="0 0 7200 5695" preserveAspectRatio="xMinYMin meet">
+            <polygon class="cls-1" points="0 893 689.85 880.74 663.3 499.81 494.79 569.26 151.64 578.45 0 464.06 0 893" fill="magenta" />
+        </svg>
+        <svg id="eyck-ga" viewBox="0 0 7200 5695" preserveAspectRatio="xMinYMin meet">
+            <polygon class="cls-1" points="1317.72 0 1726.23 220.47 1015.43 616.72 1125.72 796.47 1628.19 796.47 2159.26 1196.81 2490.15 1213.15 2138.83 1597.15 2490.15 1838.17 3062.06 1838.17 3131.51 1380.64 3495.09 1584.89 3899.51 1384.72 4373.38 1462.34 5357.89 718.85 5619.34 686.17 5582.57 298.09 5321.13 0 1317.72 0" fill="magenta" />
+        </svg>
+    </div>
+
+    <img id="gozzoli-aotm" src="images/Gozzoli_AotM.png" alt="Gozzoli AotM">
+    <img id="scaled-gozzoli-aotm" src="images/Gozzoli_AotM.png" alt="Scaled Gozzoli AotM" style="display: none;">
+
+    <div id="caption"></div>
+    <div id="magnifier"></div>
+    <div id="magnifier-right"></div>
+
+    <script>
+        const shapes = [
+            { element: document.querySelector('#botticelli-bov polygon'), caption: 'Botticelli, Birth of Venus' },
+            { element: document.querySelector('#botticelli-primavera polygon'), caption: 'Botticelli, Primavera' },
+            { element: document.querySelector('#eyck-ga polygon'), caption: 'Van Eyck, Ghent Altarpiece' }
+        ];
+        const caption = document.getElementById('caption');
+        const magnifier = document.getElementById('magnifier');
+        const magnifierRight = document.getElementById('magnifier-right');
+        const imageContainer = document.getElementById('imageContainer');
+        const gozzoliAotM = document.getElementById('gozzoli-aotm');
+        const scaledGozzoliAotM = document.getElementById('scaled-gozzoli-aotm');
+
+        // Debounce function to improve performance
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Mouseover and mouseout event handling with debounce
+        shapes.forEach(shape => {
+            shape.element.addEventListener('mouseover', debounce(() => {
+                caption.textContent = shape.caption;
+                caption.style.visibility = 'visible';
+            }, 100));
+            shape.element.addEventListener('mouseout', debounce(() => {
+                caption.style.visibility = 'hidden';
+            }, 100));
+        });
+
+        function scaleContent() {
+            const width = window.innerWidth * 0.48; // 48% of viewport width
+            const aspectRatio = 7200 / 5695; // Aspect ratio of the background image (example value, adjust as needed)
+
+            // Set width and calculate height based on aspect ratio
+            imageContainer.style.width = `${width}px`;
+            imageContainer.style.height = `${width / aspectRatio}px`;
+
+            // Set the background image and size
+            imageContainer.style.backgroundImage = `url('images/Background.png')`;
+            imageContainer.style.backgroundSize = 'contain';
+
+            // Ensure SVGs maintain aspect ratio and follow the container
+            document.querySelectorAll('svg').forEach(svg => {
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+            });
+
+            // Set the dimensions for Gozzoli_AotM
+            gozzoliAotM.style.width = `${width}px`;
+            gozzoliAotM.style.height = `${width / aspectRatio}px`;
+
+            // Set the dimensions for the scaled image
+            scaledGozzoliAotM.style.width = `${width}px`;
+            scaledGozzoliAotM.style.height = `${width / aspectRatio}px`;
+        }
+
+        // Scale content on load and when the window is resized
+        window.addEventListener('load', scaleContent);
+        window.addEventListener('resize', debounce(scaleContent, 100));
+
+        // Magnifying Glass Effect
+        function updateMagnifiers(event) {
+            if (magnifier.style.display === 'none' && magnifierRight.style.display === 'none') {
+                return; // Do nothing if magnifiers are hidden
+            }
+            
+            const rect = imageContainer.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Calculate background image scale
+            const scale = 2; // Adjust the scale factor as needed
+
+            // Update magnifier for the left image
+            magnifier.style.left = `${event.clientX}px`;
+            magnifier.style.top = `${event.clientY}px`;
+            magnifier.style.backgroundImage = `url('images/Background.png')`;
+            magnifier.style.backgroundSize = `${imageContainer.offsetWidth * scale}px ${imageContainer.offsetHeight * scale}px`;
+            magnifier.style.backgroundPosition = `-${x * scale - magnifier.offsetWidth / 2}px -${y * scale - magnifier.offsetHeight / 2}px`;
+            magnifier.style.display = 'block';
+
+            // Update magnifier for the right image
+            const rightX = event.clientX + window.innerWidth * 0.48;
+            magnifierRight.style.left = `${rightX}px`;
+            magnifierRight.style.top = `${event.clientY}px`;
+            magnifierRight.style.backgroundImage = `url('images/Scaled_Gozzoli_AotM.png')`; // Reference scaled version
+            magnifierRight.style.backgroundSize = `${imageContainer.offsetWidth * scale}px ${imageContainer.offsetHeight * scale}px`;
+            magnifierRight.style.backgroundPosition = `-${x * scale - magnifierRight.offsetWidth / 2}px -${y * scale - magnifierRight.offsetHeight / 2}px`;
+            magnifierRight.style.display = 'block';
+        }
+
+        function toggleMagnifiers(event) {
+            if (event.key === 'm' || event.key === 'M') {
+                const isVisible = magnifier.style.display === 'block';
+                magnifier.style.display = isVisible ? 'none' : 'block';
+                magnifierRight.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+
+        imageContainer.addEventListener('mousemove', updateMagnifiers);
+        document.addEventListener('keydown', toggleMagnifiers);
+    </script>
+</body>
+</html>
